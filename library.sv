@@ -15,3 +15,19 @@ module Async2Sync(
     end
 
 endmodule
+
+module HalfClock(
+    input logic clk,
+    input logic rst_n,
+    
+    output logic half_clk
+);
+
+    always_ff @(posedge clk) begin
+        if(~rst_n)
+            half_clk <= 0;
+        else
+            half_clk <= ~half_clk;
+    end
+
+endmodule
