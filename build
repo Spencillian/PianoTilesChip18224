@@ -1,0 +1,42 @@
+#!/bin/bash
+
+fpga() {
+	nextpnr-ecp5 --12k --json builds/synth_out.json --lpf constraints.lpf --textcfg builds/pnr_out.config
+    if [ "$?" != 0 ]; then
+        exit 1
+    fi
+    ecppack --compress builds/pnr_out.config builds/bitstream.bit
+    if [ "$?" != 0 ]; then
+        exit 1
+    fi
+	fujprog builds/bitstream.bit
+    if [ "$?" != 0 ]; then
+        exit 1
+    fi
+}
+
+case $1 in
+"")
+    yosys -p 'read_verilog -sv pll25mhzto8mhz.sv pll25mhzto3mhz.sv library.sv spi.sv main.sv; synth_ecp5 -json builds/synth_out.json -top ChipInterface'
+    if [ "$?" != 0 ]; then
+        exit 1
+    fi
+    fpga
+    ;;
+"test")
+    make -Bf main_testbench.mk
+    ;;
+spi)
+    make -Bf spi_testbench.mk
+    if [ "$2" == 'fpga' ]; then
+        yosys -p 'read_verilog -sv library.sv spi.sv; synth_ecp5 -json builds/synth_out.json -top Chip2SPI'
+        fpga
+    fi
+    ;;
+fpga)
+    fpga
+    ;;
+*)
+    echo "Error: Unknown command"
+    ;;
+esac
