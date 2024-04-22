@@ -14,7 +14,8 @@ module SPI(
     input logic rst_n,
 
     output logic en,
-    output logic gets_to
+    output logic gets_to,
+    output logic end_byte
 );
 
     // code tool potential upgrades: Writing in modules should tell you what 
@@ -28,7 +29,7 @@ module SPI(
     assign spi_clk = ~clk & en;
     assign end_byte =& count;
 
-    assign mosi = out_byte[count];
+    assign mosi = out_byte[3'b111 - count];
 
     always_ff @(posedge clk) begin
         if(~rst_n)
@@ -37,16 +38,29 @@ module SPI(
             count <= count + 3'b1;
     end
 
-    enum logic [3:0] { 
+    enum logic [4:0] { 
         STARTUP,
+
         ENABLE_CHARGE, 
         ENABLE_CHARGE1, 
+
         SET_CONTRAST,
         SET_CONTRAST1,
+
         SET_CHARGE, 
         SET_CHARGE1,
+
         POWER_ON_DISPLAY, 
         ENABLE_DISPLAY,
+
+        SET_PAGE_ADDR,
+        SET_PAGE_ADDR1,
+        SET_PAGE_ADDR2,
+
+        SET_COL_ADDR,
+        SET_COL_ADDR1,
+        SET_COL_ADDR2,
+
         WAIT
     } state, next;
 
@@ -60,8 +74,8 @@ module SPI(
     always_ff @(posedge clk) begin
         if(~rst_n)
             gets_to <= 0;
-        if(state == STARTUP)
-            gets_to <= 0;
+        if(state == ENABLE_DISPLAY)
+            gets_to <= 1;
     end
 
     always_comb begin
@@ -118,7 +132,43 @@ module SPI(
                 en = 1'b1;
                 out_byte = 8'hAF;
 
-                next = (end_byte) ? WAIT : ENABLE_DISPLAY;
+                next = (end_byte) ? SET_PAGE_ADDR : ENABLE_DISPLAY;
+            end
+            SET_PAGE_ADDR: begin
+                en = 1'b1;
+                out_byte = 8'h22;
+
+                next = (end_byte) ? SET_PAGE_ADDR1 : SET_PAGE_ADDR;
+            end
+            SET_PAGE_ADDR1: begin
+                en = 1'b1;
+                out_byte = 8'h00;
+
+                next = (end_byte) ? SET_PAGE_ADDR2 : SET_PAGE_ADDR1;
+            end
+            SET_PAGE_ADDR2: begin
+                en = 1'b1;
+                out_byte = 8'hFF;
+
+                next = (end_byte) ? SET_COL_ADDR : SET_PAGE_ADDR2;
+            end
+            SET_COL_ADDR: begin
+                en = 1'b1;
+                out_byte = 8'h21;
+
+                next = (end_byte) ? SET_COL_ADDR1 : SET_COL_ADDR;
+            end
+            SET_COL_ADDR1: begin
+                en = 1'b1;
+                out_byte = 8'h00;
+
+                next = (end_byte) ? SET_COL_ADDR2 : SET_COL_ADDR1;
+            end
+            SET_COL_ADDR2: begin
+                en = 1'b1;
+                out_byte = 8'h7F;
+
+                next = (end_byte) ? WAIT : SET_COL_ADDR2;
             end
             WAIT: begin
                 out_byte = 8'hFF;
