@@ -26,14 +26,11 @@ module ChipInterface(
         .mosi(oled_mosi), 
         .spi_clk(oled_clk), 
         .clk(clk), 
-        .rst_n(rst_n), 
-        .en(en),
-        .gets_to(gets_to),
-        .end_byte(end_byte)
+        .rst_n(rst_n),
+        .dc(oled_dc)
     );
 
     assign oled_cs_n = 1'b0;
-    assign oled_dc = 1'b0;
     assign oled_res_n = rst_n;
 
     assign led[0] = next_btn;
