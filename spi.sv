@@ -1,20 +1,18 @@
 `default_nettype none
 
 
-typedef struct packed {
-    logic test_btn;
-} spi_data_t;
-
-
 module SPI(
     output logic mosi, 
     output logic spi_clk,
     output logic dc,
 
-    input logic clk, 
-    input logic rst_n,
+    output logic [2:0] row,
+    output logic [9:0] col,
 
-    output logic en
+    input logic [7:0] data,
+
+    input logic clk, 
+    input logic rst_n
 );
 
     // code tool potential upgrades: Writing in modules should tell you what 
@@ -23,7 +21,7 @@ module SPI(
     logic [4:0] count;
     logic [4:0] count_end;
     logic [31:0] out_byte;
-    logic end_byte;
+    logic end_byte, en;
 
     // offset spi_clock in order to currectly read data on posedge
     assign spi_clk = ~clk & en;
@@ -45,6 +43,8 @@ module SPI(
         ENABLE_CHARGE,
         SET_CONTRAST,
         SET_CHARGE, 
+        REMAP_COLS,
+        SCAN_REVERSE,
 
         POWER_ON_DISPLAY,
         ENABLE_DISPLAY,
@@ -52,8 +52,8 @@ module SPI(
         SET_PAGE_ADDR,
         SET_COL_ADDR,
 
+        CLEAR,
         FRAME,
-        FRAME2,
         WAIT
     } state, next;
 
@@ -64,18 +64,26 @@ module SPI(
             state <= next;
     end
 
-    logic [15:0] frame_count;
-    always_ff @(posedge clk) begin
-        if(~rst_n)
-            frame_count <= 16'b0;
-        else if(frame_end)
-            frame_count <= 16'b0;
-        else if(state == FRAME || state == FRAME2)
-            frame_count <= frame_count + 16'b1;
-    end
+    logic col_end, row_end, frame_end;
 
-    logic frame_end;
-    assign frame_end = frame_count == 16'h1FFF;
+    assign row_end = row == '1;
+    assign col_end = col == '1;
+    assign frame_end = col_end && row_end;
+
+    always_ff @(posedge clk) begin
+        if(~rst_n) begin
+            row <= 3'b0;
+            col <= 10'b0;
+        end else if (dc && frame_end) begin
+            row <= 3'b0;
+            col <= 10'b0;
+        end else if(dc && col_end) begin
+            col <= 10'b0;
+            row <= row + 3'b1;
+        end else if(dc) begin
+            col <= col + 10'b1;
+        end
+    end
 
     always_comb begin
         count_end = 5'b00_111;
@@ -121,7 +129,21 @@ module SPI(
 
                 count_end = 5'b01_111;
 
-                next = (end_byte) ? POWER_ON_DISPLAY : SET_CHARGE;
+                next = (end_byte) ? REMAP_COLS : SET_CHARGE;
+            end
+            REMAP_COLS: begin
+                en = 1'b1;
+                out_byte = 32'hA1;
+                dc = 1'b0;
+
+                next = (end_byte) ? SCAN_REVERSE : REMAP_COLS;
+            end
+            SCAN_REVERSE: begin
+                en = 1'b1;
+                out_byte = 32'hC8;
+                dc = 1'b0;
+
+                next = (end_byte) ? POWER_ON_DISPLAY : SCAN_REVERSE;
             end
             POWER_ON_DISPLAY: begin
                 en = 1'b1;
@@ -157,21 +179,10 @@ module SPI(
             end
             FRAME: begin
                 en = 1'b1;
-                out_byte = 32'h01_00_00_00;
+                out_byte = {24'h00_00_00, data};
                 dc = 1'b1;
 
-                count_end = 5'b11_111;
-
-                next = (frame_end) ? FRAME2 : FRAME;
-            end
-            FRAME2: begin
-                en = 1'b1;
-                out_byte = 32'h02_00_00_00;
-                dc = 1'b1;
-
-                count_end = 5'b11_111;
-
-                next = (frame_end) ? FRAME : FRAME2;
+                next = (frame_end) ? WAIT : FRAME;
             end
             WAIT: begin
                 en = 1'b0;

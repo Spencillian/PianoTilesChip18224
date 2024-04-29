@@ -17,7 +17,7 @@ fpga() {
 
 case $1 in
 "")
-    yosys -p 'read_verilog -sv pll25mhzto8mhz.sv pll25mhzto3mhz.sv library.sv spi.sv main.sv; synth_ecp5 -json builds/synth_out.json -top ChipInterface'
+    yosys -p 'read_verilog -sv pll25mhzto8mhz.sv pll25mhzto3mhz.sv library.sv game.sv spi.sv main.sv; synth_ecp5 -json builds/synth_out.json -top ChipInterface'
     if [ "$?" != 0 ]; then
         exit 1
     fi

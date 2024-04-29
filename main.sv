@@ -15,19 +15,34 @@ module ChipInterface(
 
     logic clk, rst_n;
     // assign clk = clk25;
-    pll3 p(.clkin(clk25), .clkout0(clk), .locked()); // 25Mhz -> 8.33Mhz
+    pll3 p(.clkin(clk25), .clkout0(clk), .locked()); // 25Mhz -> 3.25Mhz
 
     logic next_btn;
     Async2Sync s0(.async(btn[1]), .sync(next_btn), .clk(clk));
     Async2Sync s1(.async(btn[0]), .sync(rst_n), .clk(clk));
 
-    logic en, gets_to, end_byte;
+    logic [2:0] row;
+    logic [9:0] col;
+    logic [7:0] data;
+
+    Game game(
+        .row(row),
+        .col(col),
+        .btn(btn),
+        .data(data),
+        .clk(clk),
+        .rst_n(rst_n)
+    );
+
     SPI spi(
         .mosi(oled_mosi), 
         .spi_clk(oled_clk), 
         .clk(clk), 
         .rst_n(rst_n),
-        .dc(oled_dc)
+        .dc(oled_dc),
+        .row(row),
+        .col(col),
+        .data(data)
     );
 
     assign oled_cs_n = 1'b0;
@@ -35,9 +50,7 @@ module ChipInterface(
 
     assign led[0] = next_btn;
     assign led[1] = rst_n;
-    assign led[2] = en;
-    assign led[3] = gets_to;
 
-    assign led[7:4] = '0;
+    assign led[7:2] = '0;
     
 endmodule

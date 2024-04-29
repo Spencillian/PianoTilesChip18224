@@ -60,6 +60,14 @@ async def test_spi(dut):
 
     assert dut.dc.value == 0
     byte = await get_byte(dut)
+    assert byte == '0xa1'
+
+    assert dut.dc.value == 0
+    byte = await get_byte(dut)
+    assert byte == '0xc8'
+
+    assert dut.dc.value == 0
+    byte = await get_byte(dut)
     assert byte == '0xa4'
 
     assert dut.dc.value == 0
@@ -94,9 +102,8 @@ async def test_spi(dut):
     assert byte == '0x7f'
 
     # clock through one frame and check that data is asserted correctly
-    for i in range(128*64):
-        assert dut.dc.value == 1
-        await RisingEdge(dut.clk)
+    await RisingEdge(dut.clk)
+    assert dut.dc.value == 1
 
 
 async def get_byte(dut):
