@@ -8,34 +8,60 @@ module Game(
 
     output logic [7:0] data,
 
+    input logic dc,
+
     input logic clk, 
     input logic rst_n
 );
+
+    logic frame, pframe;
+    assign frame = row == '1 && col == '1;
+    
+    logic [5:0] count;
+    logic tick;
+    assign tick = count == '1;
+    always_ff @(posedge clk) begin
+        if(~rst_n)
+            count <= '0;
+        else if(tick)
+            count <= '0;
+        else if(~pframe & frame)
+            count <= count + 10'b1;
+        pframe <= frame;
+    end
+
+    always_ff @(posedge clk) begin
+        if(~rst_n)
+            data <= '0;
+        else if(col[2:0] == 3'b0)
+            data <= data_out;
+    end
 
     logic [3:0] new_tiles;
     always_ff @(posedge clk) begin
         if(~rst_n)
             new_tiles <= 4'b0001;
-        else if (new_tiles == 4'b1000)
+        else if (tick && new_tiles == 4'b1000)
             new_tiles <= 4'b0001;
-        else
+        else if (tick)
             new_tiles <= new_tiles << 1;
     end
 
     logic [19:0] tiles;
     Tiles tilesreg(
         .new_tiles(new_tiles),
-        .shift(1'b1),
+        .shift(tick),
         .tiles(tiles),
         .clk(clk),
         .rst_n(rst_n)
     );
 
+    logic data_out;
     DisplayTiles displaytiles(
         .tiles(tiles),
         .col(col),
         .row(row),
-        .data(data),
+        .data(data_out),
         .clk(clk),
         .rst_n(rst_n)
     );
@@ -53,11 +79,10 @@ module DisplayTiles(
     input logic rst_n
 );
 
-    // assign data = (tiles[(col[9:8] << 2) + row[2:1]]) ? 8'hFF : 8'h00;
     always_comb begin
-        if(col < 10'h100) begin
+        if(col < 10'hf6) begin
             if(row < 3'h2) begin
-                data = (tiles[0]) ? 8'hFF : 8'h00;
+                data = (tiles[0]) ? 8'hFF : 9'h00;
             end else if (row < 3'h4) begin
                 data = (tiles[1]) ? 8'hFF : 8'h00;
             end else if (row < 3'h6) begin

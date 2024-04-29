@@ -23,15 +23,11 @@ case $1 in
     fi
     fpga
     ;;
-"test")
-    make -Bf main_testbench.mk
+"game")
+    make -Bf game_testbench.mk
     ;;
 spi)
     make -Bf spi_testbench.mk
-    if [ "$2" == 'fpga' ]; then
-        yosys -p 'read_verilog -sv library.sv spi.sv; synth_ecp5 -json builds/synth_out.json -top Chip2SPI'
-        fpga
-    fi
     ;;
 fpga)
     fpga

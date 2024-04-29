@@ -105,6 +105,37 @@ async def test_spi(dut):
     await RisingEdge(dut.clk)
     assert dut.dc.value == 1
 
+    for i in range(8*128*8-1):
+        assert dut.dc.value == 1
+        await RisingEdge(dut.clk)
+
+    assert dut.dc.value == 0
+    byte = await get_byte(dut)
+    assert byte == '0x22'
+
+    assert dut.dc.value == 0
+    byte = await get_byte(dut)
+    assert byte == '0x0'
+
+    assert dut.dc.value == 0
+    byte = await get_byte(dut)
+    assert byte == '0xff'
+
+    assert dut.dc.value == 0
+    byte = await get_byte(dut)
+    assert byte == '0x21'
+
+    assert dut.dc.value == 0
+    byte = await get_byte(dut)
+    assert byte == '0x0'
+
+    assert dut.dc.value == 0
+    byte = await get_byte(dut)
+    assert byte == '0x7f'
+
+    for i in range(8*128*8-1):
+        assert dut.dc.value == 1
+        await RisingEdge(dut.clk)
 
 async def get_byte(dut):
     out = []

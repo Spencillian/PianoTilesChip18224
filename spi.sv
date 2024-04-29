@@ -182,7 +182,7 @@ module SPI(
                 out_byte = {24'h00_00_00, data};
                 dc = 1'b1;
 
-                next = (frame_end) ? WAIT : FRAME;
+                next = (frame_end) ? SET_PAGE_ADDR : FRAME;
             end
             WAIT: begin
                 en = 1'b0;

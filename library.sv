@@ -25,7 +25,7 @@ module HalfClock(
 
     always_ff @(posedge clk) begin
         if(~rst_n)
-            half_clk <= 0;
+            half_clk <= clk;
         else
             half_clk <= ~half_clk;
     end

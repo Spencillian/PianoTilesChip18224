@@ -30,6 +30,7 @@ module ChipInterface(
         .col(col),
         .btn(btn),
         .data(data),
+        .dc(oled_dc),
         .clk(clk),
         .rst_n(rst_n)
     );
