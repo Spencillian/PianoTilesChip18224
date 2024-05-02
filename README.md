@@ -12,7 +12,7 @@ The design interfaces with a small SSD1306 SPI OLED display and 4 buttons for in
 Once a button is pressed you enter the game. Tiles will drop from the top and you need to press buttons when they reach the button in order to clear them. Tiles are generated using a 24 bit Linear Feedback Shift Register (LFSR) of the polynomial x^24 + x^23 + x^22 + x^17 + 1 which was the one with the longest period on wikipedia. 
 ![Tiles Dropping During Gameplay](image2.gif)
 If you lose, you get sent to a Game Over animation.
-![Flashing Game Over Screen](image2.gif)
+![Flashing Game Over Screen](image3.gif)
 After a short duration you are sent back to the play screen to play again.
 
 ## Inputs/Outputs
