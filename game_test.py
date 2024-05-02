@@ -11,5 +11,23 @@ async def test_game(dut):
     await RisingEdge(dut.clk)
     dut.rst_n.value = 1
 
-    for x in range(1000):
-        await RisingEdge(dut.clk)
+    for row in range(8):
+        for col in range(128):
+            for place in range(8):
+                dut.place.value = place
+                dut.row.value = row
+                dut.col.value = col
+                await RisingEdge(dut.clk)
+    
+    for frame in range(10):
+        # clock through pointer reset every frame
+        for i in range(48):
+            await RisingEdge(dut.clk)
+
+        for row in range(8):
+            for col in range(128):
+                for place in range(8):
+                    dut.place.value = place
+                    dut.row.value = row
+                    dut.col.value = col
+                    await RisingEdge(dut.clk)

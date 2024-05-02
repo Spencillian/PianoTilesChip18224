@@ -23,7 +23,10 @@ case $1 in
     fi
     fpga
     ;;
-"game")
+main)
+    make -Bf main_testbench.mk
+    ;;
+game)
     make -Bf game_testbench.mk
     ;;
 spi)

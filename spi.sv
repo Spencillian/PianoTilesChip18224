@@ -7,7 +7,8 @@ module SPI(
     output logic dc,
 
     output logic [2:0] row,
-    output logic [9:0] col,
+    output logic [6:0] col,
+    output logic [2:0] place,
 
     input logic [7:0] data,
 
@@ -67,23 +68,25 @@ module SPI(
     logic col_end, row_end, frame_end;
 
     assign row_end = row == '1;
-    assign col_end = col == '1;
-    assign frame_end = col_end && row_end;
+    assign col_end = col == '1 && end_byte;
+    assign frame_end = col_end && row_end && end_byte;
 
     always_ff @(posedge clk) begin
         if(~rst_n) begin
             row <= 3'b0;
-            col <= 10'b0;
+            col <= '0;
         end else if (dc && frame_end) begin
             row <= 3'b0;
-            col <= 10'b0;
+            col <= '0;
         end else if(dc && col_end) begin
-            col <= 10'b0;
+            col <= '0;
             row <= row + 3'b1;
-        end else if(dc) begin
-            col <= col + 10'b1;
+        end else if(dc && end_byte) begin
+            col <= col + 1'b1;
         end
     end
+
+    assign place = count[2:0];
 
     always_comb begin
         count_end = 5'b00_111;

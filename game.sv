@@ -3,7 +3,8 @@
 
 module Game(
     input logic [2:0] row,
-    input logic [9:0] col,
+    input logic [6:0] col,
+    input logic [2:0] place,
     input logic [6:0] btn,
 
     output logic [7:0] data,
@@ -15,9 +16,9 @@ module Game(
 );
 
     logic frame, pframe;
-    assign frame = row == '1 && col == '1;
+    assign frame = row == '1 && col == '1 && place == '1;
     
-    logic [5:0] count;
+    logic [9:0] count;
     logic tick;
     assign tick = count == '1;
     always_ff @(posedge clk) begin
@@ -26,15 +27,8 @@ module Game(
         else if(tick)
             count <= '0;
         else if(~pframe & frame)
-            count <= count + 10'b1;
+            count <= count + 1'b1;
         pframe <= frame;
-    end
-
-    always_ff @(posedge clk) begin
-        if(~rst_n)
-            data <= '0;
-        else if(col[2:0] == 3'b0)
-            data <= data_out;
     end
 
     logic [3:0] new_tiles;
@@ -56,12 +50,12 @@ module Game(
         .rst_n(rst_n)
     );
 
-    logic data_out;
     DisplayTiles displaytiles(
         .tiles(tiles),
         .col(col),
         .row(row),
-        .data(data_out),
+        .place(place),
+        .data(data),
         .clk(clk),
         .rst_n(rst_n)
     );
@@ -70,7 +64,8 @@ endmodule
 
 module DisplayTiles(
     input logic [19:0] tiles,
-    input logic [9:0] col,
+    input logic [6:0] col,
+    input logic [2:0] place,
     input logic [2:0] row,
 
     output logic [7:0] data,
@@ -79,49 +74,72 @@ module DisplayTiles(
     input logic rst_n
 );
 
-    always_comb begin
-        if(col < 10'hf6) begin
-            if(row < 3'h2) begin
-                data = (tiles[0]) ? 8'hFF : 9'h00;
-            end else if (row < 3'h4) begin
-                data = (tiles[1]) ? 8'hFF : 8'h00;
-            end else if (row < 3'h6) begin
-                data = (tiles[2]) ? 8'hFF : 8'h00;
-            end else begin
-                data = (tiles[3]) ? 8'hFF : 8'h00;
-            end
-        end else if (col < 10'h200) begin
-            if(row < 3'h2) begin
-                data = (tiles[4]) ? 8'hFF : 8'h00;
-            end else if (row < 3'h4) begin
-                data = (tiles[5]) ? 8'hFF : 8'h00;
-            end else if (row < 3'h6) begin
-                data = (tiles[6]) ? 8'hFF : 8'h00;
-            end else begin
-                data = (tiles[7]) ? 8'hFF : 8'h00;
-            end
-        end else if (col < 10'h300) begin
-            if(row < 3'h2) begin
-                data = (tiles[8]) ? 8'hFF : 8'h00;
-            end else if (row < 3'h4) begin
-                data = (tiles[9]) ? 8'hFF : 8'h00;
-            end else if (row < 3'h6) begin
-                data = (tiles[10]) ? 8'hFF : 8'h00;
-            end else begin
-                data = (tiles[11]) ? 8'hFF : 8'h00;
-            end
-        end else begin
-            if(row < 3'h2) begin
-                data = (tiles[12]) ? 8'hFF : 8'h00;
-            end else if (row < 3'h4) begin
-                data = (tiles[13]) ? 8'hFF : 8'h00;
-            end else if (row < 3'h6) begin
-                data = (tiles[14]) ? 8'hFF : 8'h00;
-            end else begin
-                data = (tiles[15]) ? 8'hFF : 8'h00;
-            end
-        end
-    end
+    logic place_start;
+    assign place_start = place == 3'h0;
+    
+    logic [4:0] tile_loc;
+    assign tile_loc = {1'b0, col[6:5], row[2:1]};
+
+    assign data = (tiles[tile_loc]) ? 8'hFF & mask : 8'h00 & mask;
+
+    logic [7:0] mask;
+    assign mask = (col == 7'h0 
+                || col == 7'h1f
+                || col == 7'h20 
+                || col == 7'h3f
+                || col == 7'h40
+                || col == 7'h5f
+                || col == 7'h60
+                || col == 7'h7f) ? 8'h00 : 8'hFF;
+    
+    // always_ff @(posedge clk) begin
+    //     if(~rst_n) begin
+    //         data <= 8'h00;
+    //     end else if(place_start) begin
+    //         data <= (tiles[tile_loc]) ? 8'hFF : 8'h00;
+    //     end
+        // if(col < 10'hf6) begin
+        //     if(row < 3'h2) begin
+        //         data = (tiles[0]) ? 8'hFF : 9'h00;
+        //     end else if (row < 3'h4) begin
+        //         data = (tiles[1]) ? 8'hFF : 8'h00;
+        //     end else if (row < 3'h6) begin
+        //         data = (tiles[2]) ? 8'hFF : 8'h00;
+        //     end else begin
+        //         data = (tiles[3]) ? 8'hFF : 8'h00;
+        //     end
+        // end else if (col < 10'h200) begin
+        //     if(row < 3'h2) begin
+        //         data = (tiles[4]) ? 8'hFF : 8'h00;
+        //     end else if (row < 3'h4) begin
+        //         data = (tiles[5]) ? 8'hFF : 8'h00;
+        //     end else if (row < 3'h6) begin
+        //         data = (tiles[6]) ? 8'hFF : 8'h00;
+        //     end else begin
+        //         data = (tiles[7]) ? 8'hFF : 8'h00;
+        //     end
+        // end else if (col < 10'h300) begin
+        //     if(row < 3'h2) begin
+        //         data = (tiles[8]) ? 8'hFF : 8'h00;
+        //     end else if (row < 3'h4) begin
+        //         data = (tiles[9]) ? 8'hFF : 8'h00;
+        //     end else if (row < 3'h6) begin
+        //         data = (tiles[10]) ? 8'hFF : 8'h00;
+        //     end else begin
+        //         data = (tiles[11]) ? 8'hFF : 8'h00;
+        //     end
+        // end else begin
+        //     if(row < 3'h2) begin
+        //         data = (tiles[12]) ? 8'hFF : 8'h00;
+        //     end else if (row < 3'h4) begin
+        //         data = (tiles[13]) ? 8'hFF : 8'h00;
+        //     end else if (row < 3'h6) begin
+        //         data = (tiles[14]) ? 8'hFF : 8'h00;
+        //     end else begin
+        //         data = (tiles[15]) ? 8'hFF : 8'h00;
+        //     end
+        // end
+    // end
 
 endmodule 
 
@@ -137,7 +155,7 @@ module Tiles(
 
     always_ff @(posedge clk) begin
         if(~rst_n) begin
-            tiles <= 20'h0;
+            tiles <= 20'h81248;
         end else if (shift) begin
             tiles[3:0] <= new_tiles;
             tiles[7:4] <= tiles[3:0];
