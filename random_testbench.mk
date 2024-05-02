@@ -1,5 +1,5 @@
 TOPLEVEL_LANG = verilog
-VERILOG_SOURCES = $(shell pwd)/random.sv
+VERILOG_SOURCES = $(shell pwd)/src/random.sv
 TOPLEVEL = Random
 MODULE = random_test
 SIM = verilator

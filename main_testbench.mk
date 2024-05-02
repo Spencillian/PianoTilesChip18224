@@ -1,5 +1,5 @@
 TOPLEVEL_LANG = verilog
-VERILOG_SOURCES = $(shell pwd)/main.sv $(shell pwd)/library.sv $(shell pwd)/game.sv $(shell pwd)/spi.sv $(shell pwd)/random.sv
+VERILOG_SOURCES = $(shell pwd)/src/main.sv $(shell pwd)/src/library.sv $(shell pwd)/src/game.sv $(shell pwd)/src/spi.sv $(shell pwd)/src/random.sv
 TOPLEVEL = ChipInterface
 MODULE = main_test
 SIM = verilator

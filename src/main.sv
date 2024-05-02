@@ -1,10 +1,9 @@
 `default_nettype none
 
 module ChipInterface(
-    output logic [7:0] led,
     input logic [6:0] btn,
 
-    input logic clk25,
+    input logic clk,
 
     output logic oled_clk,
     output logic oled_mosi,
@@ -13,8 +12,7 @@ module ChipInterface(
     output logic oled_cs_n
 );
 
-    logic clk, rst_n;
-    assign clk = clk25;
+    logic rst_n;
 
     logic [5:0] sbtn;
     Async2Sync async2sync0(.async(btn[0]), .sync(rst_n), .clk(clk));
@@ -55,9 +53,4 @@ module ChipInterface(
 
     assign oled_cs_n = 1'b0;
     assign oled_res_n = rst_n;
-
-    assign led[0] = rst_n;
-
-    assign led[7:1] = '0;
-    
 endmodule

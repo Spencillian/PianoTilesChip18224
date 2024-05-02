@@ -33,7 +33,7 @@ module Game(
 
     enum logic [2:0] { WAIT, WAIT1, WAIT2, PLAY, PLAY1, PLAY2, GAMEOVER } state, next;
     logic game_over, playing;
-    logic [6:0] stages;
+    logic [4:0] stages;
     logic [7:0] tile_data, text_data;
 
     always_ff @(posedge tick, negedge rst_n) begin
@@ -50,12 +50,20 @@ module Game(
         playing = '0;
         case (state)
             WAIT: begin
-                next = (btn[5]) ? WAIT1 : WAIT;
+                next = (btn[5]
+                      | btn[4]
+                      | btn[3]
+                      | btn[2]
+                      | btn[1]) ? WAIT1 : WAIT;
 
                 data = text_data;
             end
             WAIT1: begin
-                next = (~btn[5] && tick) ? WAIT2 : WAIT1;
+                next = (~(btn[5]
+                        | btn[4]
+                        | btn[3]
+                        | btn[2]
+                        | btn[1]) && tick) ? WAIT2 : WAIT1;
 
                 data = text_data;
             end

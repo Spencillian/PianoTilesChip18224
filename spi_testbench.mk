@@ -1,5 +1,5 @@
 TOPLEVEL_LANG = verilog
-VERILOG_SOURCES = $(shell pwd)/spi.sv
+VERILOG_SOURCES = $(shell pwd)/src/spi.sv
 TOPLEVEL = SPI
 MODULE = spi_test
 SIM = verilator
