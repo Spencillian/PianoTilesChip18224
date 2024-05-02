@@ -15,11 +15,15 @@ module ChipInterface(
 
     logic clk, rst_n;
     assign clk = clk25;
-    // pll8 p(.clkin(clk25), .clkout0(clk), .locked()); // 25Mhz -> 3.25Mhz
 
-    logic next_btn;
-    Async2Sync async2sync0(.async(btn[1]), .sync(next_btn), .clk(clk));
-    Async2Sync async2sync1(.async(btn[0]), .sync(rst_n), .clk(clk));
+    logic [5:0] sbtn;
+    Async2Sync async2sync0(.async(btn[0]), .sync(rst_n), .clk(clk));
+    Async2Sync async2sync1(.async(btn[1]), .sync(sbtn[0]), .clk(clk));
+    Async2Sync async2sync2(.async(btn[2]), .sync(sbtn[1]), .clk(clk));
+    Async2Sync async2sync3(.async(btn[3]), .sync(sbtn[2]), .clk(clk));
+    Async2Sync async2sync4(.async(btn[4]), .sync(sbtn[3]), .clk(clk));
+    Async2Sync async2sync5(.async(btn[5]), .sync(sbtn[4]), .clk(clk));
+    Async2Sync async2sync6(.async(btn[6]), .sync(sbtn[5]), .clk(clk));
 
     logic [2:0] row;
     logic [6:0] col;
@@ -30,7 +34,7 @@ module ChipInterface(
         .row(row),
         .col(col),
         .place(place),
-        .btn(btn),
+        .btn(sbtn),
         .data(data),
         .dc(oled_dc),
         .clk(clk),
@@ -52,9 +56,8 @@ module ChipInterface(
     assign oled_cs_n = 1'b0;
     assign oled_res_n = rst_n;
 
-    assign led[0] = next_btn;
-    assign led[1] = rst_n;
+    assign led[0] = rst_n;
 
-    assign led[7:2] = '0;
+    assign led[7:1] = '0;
     
 endmodule

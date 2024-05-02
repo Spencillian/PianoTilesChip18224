@@ -18,6 +18,12 @@ module SPI(
 
     // code tool potential upgrades: Writing in modules should tell you what 
     // output ports haven't been bound yet
+    // 
+    // its probably also possible to have printing within an HDL
+    // that happens in simulation only. you could take this a step further
+    // and having integrated verification within the HDL
+    // the idea is to make verification and debugging two sides of the same
+    // coin, which would make verification more intuitive
 
     logic [4:0] count;
     logic [4:0] count_end;

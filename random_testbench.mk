@@ -1,7 +1,7 @@
 TOPLEVEL_LANG = verilog
-VERILOG_SOURCES = $(shell pwd)/spi.sv
-TOPLEVEL = SPI
-MODULE = spi_test
+VERILOG_SOURCES = $(shell pwd)/random.sv
+TOPLEVEL = Random
+MODULE = random_test
 SIM = verilator
 EXTRA_ARGS += --trace --trace-structs -Wno-fatal
 include $(shell cocotb-config --makefiles)/Makefile.sim
