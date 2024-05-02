@@ -9,7 +9,7 @@ module my_chip (
 
     ChipInterface my_chip(
         .btn({~reset, io_in[5:0]}),
-        .clock(clk), //  Run at 25Mhz!!!
+        .clk(clock), //  Run at 25Mhz!!!
         .oled_clk(io_out[11]),
         .oled_mosi(io_out[10]),
         .oled_dc(io_out[9]),

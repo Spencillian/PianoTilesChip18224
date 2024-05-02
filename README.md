@@ -34,8 +34,8 @@ After a short duration you are sent back to the play screen to play again.
 This design needs at least 4 buttons to work (2 and 4 need to pulled low if not in use) and a SSD1306 OLED Display
 
 ## Design Testing / Bringup
-In order to check that outputs are correct you will need a Digital Logic Analyzer.
-In order to perform a full test, the SPI Display and buttons need to be properly wired to the chip. Testing is then done but just playing the game. (The best kind of testing)
+In order to check that outputs are correct you will need a Digital Logic Analyzer. The most important parts to check are the spi initialization bytes. If this doesn't work than the screen will not turn on. As long as this is correct, the rest of the game should just work.
+From here you need to attach the screen and the buttons to the screen. The screen needs a seperate 3.3V power supply, but the logic of the SPI Driver should be enough to drive the OLED part of the display. This should hopefully bring up the nice screen with the flashing PLAY text and you should be able to play.
 
 ## Media
 I have a lot of media in the form of videos which are a bit too hefty to upload to github. A full devlog will be made once I get a website.
